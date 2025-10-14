@@ -4,6 +4,7 @@ out/
 *.imlg
 !**/src/main/**/out/
 !**/src/test/**/out/
+src/main/recources
 .jar
 ### Eclipse ###
 .apt_generated
