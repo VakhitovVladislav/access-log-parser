@@ -24,9 +24,7 @@ public class Statistics {
         this.minTime = null;
         this.maxTime = null;
     }
-    public void addEntry(List<LogEntry> logs, String minTime, String maxTime){
-        this.minTime = LocalDateTime.parse(minTime, APACHE_FORMATTER);
-        this.maxTime = LocalDateTime.parse(maxTime, APACHE_FORMATTER);
+    public void addEntry(List<LogEntry> logs){
         for (LogEntry log: logs) {
             LocalDateTime entryTime = log.getDateTime();
             if (this.minTime == null || entryTime.isBefore(this.minTime)) {
