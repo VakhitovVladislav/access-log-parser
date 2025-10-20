@@ -6,6 +6,7 @@ out/
 !**/src/test/**/out/
 src/main/recources
 .jar
+src/main/java/test.java
 ### Eclipse ###
 .apt_generated
 .classpath
