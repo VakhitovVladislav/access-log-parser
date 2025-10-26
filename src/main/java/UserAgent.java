@@ -3,33 +3,34 @@ package main.java;
 
 import main.java.enums.Browsers;
 import main.java.enums.OperationSystem;
+
 public class UserAgent {
-    private final String browser;
-    private final String operationalSystem;
+    private final Browsers browser;
+    private final OperationSystem operationalSystem;
 
     public UserAgent(String userAgent) {
-        this.browser = checkBrowser(userAgent).toString();
-        this.operationalSystem = checkOS(userAgent).toString();
+        this.browser = checkBrowser(userAgent);
+        this.operationalSystem = checkOS(userAgent);
     }
 
-    private OperationSystem checkOS(String userAgentString){
+    private OperationSystem checkOS(String userAgentString) {
         String checkString = userAgentString.toLowerCase();
-        if(checkString.contains("windows")){
+        if (checkString.contains("windows")) {
             return OperationSystem.WINDOWS;
-        } else if (checkString.contains("mac")){
+        } else if (checkString.contains("mac os") || checkString.contains("iPhone") || checkString.contains("iPad") || checkString.contains("OPiOS")) {
             return OperationSystem.MACOS;
-        } else if (checkString.contains("andriod")) {
-        return OperationSystem.ANDROID;
+        } else if (checkString.contains("android")) {
+            return OperationSystem.ANDROID;
         } else if (checkString.contains("linux")) {
             return OperationSystem.LINUX;
-        } else if (checkString.contains("ios") || checkString.contains("iPhone") ||checkString.contains("iPad") ) {
-            return OperationSystem.IOS;
-        }else {return OperationSystem.OTHER_OS;
+        } else {
+            return OperationSystem.OTHER_OS;
         }
     }
-    private Browsers checkBrowser(String userAgentString){
+
+    private Browsers checkBrowser(String userAgentString) {
         String checkString = userAgentString.toLowerCase();
-        if(checkString.contains("edg/") || checkString.contains("edge/")){
+        if (checkString.contains("edg/") || checkString.contains("edge/")) {
             return Browsers.EDGE;
         } else if (checkString.contains("fireFox")) {
             return Browsers.FIREFOX;
@@ -39,7 +40,9 @@ public class UserAgent {
             return Browsers.SAFARI;
         } else if (checkString.contains("chrome")) {
             return Browsers.CHROME;
-        }else {return Browsers.OTHER;}
+        } else {
+            return Browsers.OTHER;
+        }
     }
 
     //Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/103.0.5060.134 Safari/537.36"
@@ -50,20 +53,18 @@ public class UserAgent {
     //"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
     //"Mozilla/5.0 (iPhone; CPU iPhone OS 8_1_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) OPiOS/9.1.0.86723 Mobile/12B440 Safari/9537.53"
     //"Mozilla/5.0 (feeder.co; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
-    public String getBrowser() {
+    public Browsers getBrowser() {
         return browser;
     }
 
-    public String getOperationalSystem() {
+    public OperationSystem getOperationalSystem() {
         return operationalSystem;
     }
-
-
     @Override
     public String toString() {
         return "UserAgent{" +
                 "browser='" + browser + '\'' +
-                ", operationalSystem='" + operationalSystem + '\'' +
+                ", operationalSystem='" + OperationSystem.valueOf(String.valueOf(operationalSystem)) + '\'' +
                 '}';
     }
 }

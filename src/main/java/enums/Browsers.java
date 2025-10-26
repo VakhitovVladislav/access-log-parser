@@ -1,5 +1,8 @@
 package main.java.enums;
 
+import main.java.LogEntry;
+import main.java.Statistics;
+
 public enum Browsers {
     EDGE("Edge"),
     FIREFOX("Firefox"),
@@ -11,9 +14,7 @@ public enum Browsers {
     Browsers(String browserName) {
         this.browserName = browserName;
     }
-
     private final String browserName;
-
     public String getBrowserName() {
         return browserName;
     }

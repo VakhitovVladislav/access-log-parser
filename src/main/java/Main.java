@@ -1,7 +1,6 @@
 package main.java;
 
 import java.io.*;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +37,6 @@ public class Main {
                 tryCount++;
                 System.out.println("The file is " + tryCount);
                 // Задание #1. Обработка исключений
-                //TODO разобраться почему в файле около 7к строк, но каунтер возвращает 191 тысячу
                 try (FileReader fileReader = new FileReader(path)) {
                     BufferedReader reader = new BufferedReader(fileReader);
                     List<String> lines = reader.lines().collect(Collectors.toList());
