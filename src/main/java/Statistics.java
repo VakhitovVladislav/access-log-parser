@@ -15,6 +15,10 @@ public class Statistics {
     public LocalDateTime maxTime;
     private int entryCount;
     private HashMap<String, Integer> osStatistic;
+    private HashMap<String, Integer> browserStatistic;
+    
+
+    private HashSet<String> notFoundPageList;
 
     private HashSet<String> pageList;
 
@@ -26,6 +30,8 @@ public class Statistics {
     }
 
     public void addEntry(List<LogEntry> logs) {
+        notFoundPageList = new HashSet<>();
+        browserStatistic = new HashMap<>();
         pageList = new HashSet<>();
         osStatistic = new HashMap<>();
         for (LogEntry log : logs) {
@@ -38,19 +44,40 @@ public class Statistics {
             }
             this.entryCount++;
             this.totalTraffic += log.getResponseSize();
-            if(log.getResponseCode().equals("200")){
-                pageList.add(log.getUrl());
-            }
-            if (!osStatistic.containsKey(log.getUserAgent().getOperationalSystem().toString())){
-                osStatistic.put(log.getUserAgent().getOperationalSystem().getOperationSystemName(), 1);
-            } else {
-                osStatistic.replace(log.getUserAgent().getOperationalSystem().toString(),
-                        osStatistic.get(log.getUserAgent().getOperationalSystem().getOperationSystemName())+1);
-            }
+            createOKPagesList(log);
+            createNotFoundPageList(log);
+            operationSystemCount(log);
+            browsersCount(log);
+            getOsStatistic(osStatistic);
+            getBrowsersStatistic(browserStatistic);
         }
         getOsStatistic(osStatistic);
-        System.out.println(getOsStatistic(osStatistic));
     }
+
+    private void operationSystemCount(LogEntry log) {
+        if (!osStatistic.containsKey(log.getUserAgent().getOperationalSystem().toString())){
+            osStatistic.put(log.getUserAgent().getOperationalSystem().getOperationSystemName(), 1);
+        } else {
+            osStatistic.replace(log.getUserAgent().getOperationalSystem().toString(),
+                    osStatistic.get(log.getUserAgent().getOperationalSystem().getOperationSystemName())+1);
+        }
+    }
+
+    private void browsersCount(LogEntry log) {
+        if (!browserStatistic.containsKey(log.getUserAgent().getBrowser().getBrowserName())){
+            browserStatistic.put(log.getUserAgent().getBrowser().getBrowserName(), 1);
+        } else {
+            browserStatistic.replace(log.getUserAgent().getBrowser().getBrowserName(),
+                    browserStatistic.get(log.getUserAgent().getBrowser().getBrowserName())+1);
+        }
+    }
+
+    private void createOKPagesList(LogEntry log) {
+        if(log.getResponseCode().equals("200")){
+            pageList.add(log.getUrl());
+        }
+    }
+
     public HashMap<String, Double> getOsStatistic(HashMap<String, Integer> osStatistic){
         HashMap<String, Double> result = new HashMap<>();
         double allPersents = osStatistic.values().stream()
@@ -58,6 +85,20 @@ public class Statistics {
                 .sum();
         osStatistic.forEach((key, value) -> result.put(key, value / allPersents));
         return result;
+    }
+    public HashMap<String, Double> getBrowsersStatistic(HashMap<String, Integer> browsersStatistic){
+        HashMap<String, Double> result = new HashMap<>();
+        double allPersents = browsersStatistic.values().stream()
+                .mapToDouble(i -> i)
+                .sum();
+        browsersStatistic.forEach((key, value) -> result.put(key, value / allPersents));
+        return result;
+    }
+
+    public void createNotFoundPageList(LogEntry log){
+        if(log.getResponseCode().equals("404")){
+            notFoundPageList.add(log.getUrl());
+        }
     }
 
 
@@ -95,6 +136,14 @@ public class Statistics {
     }
     private HashSet<String> getPageList() {
         return pageList;
+    }
+
+    public HashMap<String, Integer> getOsStatistic() {
+        return osStatistic;
+    }
+
+    public HashSet<String> getNotFoundPageList() {
+        return notFoundPageList;
     }
 
 
