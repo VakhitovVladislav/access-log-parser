@@ -5,7 +5,6 @@ public enum OperationSystem {
     MACOS("macOS"),
     LINUX("Linux"),
     ANDROID("Android"),
-    IOS("iOS"),
     OTHER_OS("Other_OS");
     private final String operationSystemName;
 

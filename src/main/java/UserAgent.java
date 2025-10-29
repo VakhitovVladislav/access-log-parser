@@ -8,9 +8,14 @@ public class UserAgent {
     private final Browsers browser;
     private final OperationSystem operationalSystem;
 
+
+
+    private boolean isBot;
+
     public UserAgent(String userAgent) {
         this.browser = checkBrowser(userAgent);
         this.operationalSystem = checkOS(userAgent);
+        this.isBot = checkBot(userAgent);
     }
 
     private OperationSystem checkOS(String userAgentString) {
@@ -44,6 +49,9 @@ public class UserAgent {
             return Browsers.OTHER;
         }
     }
+    private Boolean checkBot(String userAgentString){
+        return  userAgentString.contains("bot") || userAgentString.contains("Bot");
+    }
 
     //Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/103.0.5060.134 Safari/537.36"
     //"Mozilla/5.0 (Linux; Android 7.0; Moto G (5) Build/NPPS25.137-93-14; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/69.0.3497.100 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/100.238.238.226.101;]"
@@ -55,6 +63,10 @@ public class UserAgent {
     //"Mozilla/5.0 (feeder.co; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
     public Browsers getBrowser() {
         return browser;
+    }
+
+    public boolean isBot() {
+        return isBot;
     }
 
     public OperationSystem getOperationalSystem() {
