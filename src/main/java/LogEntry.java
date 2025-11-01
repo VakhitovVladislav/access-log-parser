@@ -32,8 +32,9 @@ public class LogEntry {
         this.responseCode = extractResponseCode(line);
         line = line.substring(line.indexOf(" ")).trim();
         this.responseSize = extractResponseSize(line);
-        this.refer = extractRefer(line);
         this.userAgent = new UserAgent(line);
+        this.refer = extractRefer(line);
+
     }
 
     //15.40.185.139 - - [25/Sep/2022:06:25:13 +0300] "GET /recruitment/november-reports/anthropology/6378/62/d46438?print=1 HTTP/1.0" 200 16862 "-" "Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)"
@@ -65,10 +66,11 @@ public class LogEntry {
     }
 
     private String extractRefer(String line) {
-        if (!line.contains("http://")) {
-            return null;
+        if (line.contains("https://") || line.contains("http://")) {;
+            String[] parts = line.split("/");
+            return parts[2];
         } else
-            return line.substring(line.indexOf("http://")).replace(")", "");
+            return null;
     }
 
     public String getIp() {

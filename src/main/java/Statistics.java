@@ -15,29 +15,34 @@ public class Statistics {
     public LocalDateTime minTime;
     public LocalDateTime maxTime;
     private int entryCount;
-    private HashMap<String, Integer> osStatistic;
-    private HashMap<String, Integer> browserStatistic;
-    private HashMap<String, Integer> uniqueVisitorsList;
-    private long uniqueVisitorsCount;
+    private final HashMap<String, Integer> osStatistic;
+    private final HashMap<String, Integer> browserStatistic;
+    private final HashMap<String, Integer> uniqueVisitorsList;
     private long realVisitorsCount;
     private long errorResponseCount;
     private final HashSet<String> notFoundPageList = new HashSet<>();
+    private final HashMap<LocalDateTime, Integer> visitsPerSecondList;
+    private final HashSet<String> pageList;
+    private final HashSet<String> referThisSiteList;
 
-    private HashSet<String> pageList;
-    private HashMap<String, Integer> uniqueVisitorsStatistic;
+
 
     public Statistics() {
         this.totalTraffic = 0;
         this.entryCount = 0;
         this.minTime = null;
         this.maxTime = null;
+        this.browserStatistic = new HashMap<>();
+        this.pageList = new HashSet<>();
+        this.uniqueVisitorsList = new HashMap<>();
+        this.osStatistic = new HashMap<>();
+        this.referThisSiteList = new HashSet<>();
+        this.visitsPerSecondList = new HashMap<>();
+
     }
 
     public void addEntry(List<LogEntry> logs) {
-        browserStatistic = new HashMap<>();
-        pageList = new HashSet<>();
-        uniqueVisitorsList = new HashMap<>();
-        osStatistic = new HashMap<>();
+
         for (LogEntry log : logs) {
             LocalDateTime entryTime = log.getDateTime();
             if (this.minTime == null || entryTime.isBefore(this.minTime)) {
@@ -48,28 +53,59 @@ public class Statistics {
             }
             this.entryCount++;
             this.totalTraffic += log.getResponseSize();
-            createOKPagesList(log); // заполняем переменную ageList
+            createOKPagesList(log); // заполняем переменную pageList
             createNotFoundPageList(log); // заполняем переменную notFoundPageList
             operationSystemCount(log); // считаем общее число Операционных систем
-            browsersCount(log); // считаем общее число браузеров
-            realVisitorsCounter(log); // заполняем параметр realUsers
+            browsersCount(log); // считаем общее число браузеров// заполняем параметр realUsers
             errorResponseCounter(log); // считаем и заполняем переменную  errorResponseCount
-            realVisitorsCounter(log); // считаем уникальных пользователей и добавляем их в HashMap
+            uniqueVisitorsCounter(log); // считаем уникальных пользователей и добавляем их в HashMap
+            addReferThisSiteList(log); // наполняем список доменов, которые поситили сайт
+            addVisitsCountPerSecond(log);
+            addUniqueVisitorsList(log);
+
 
         }
     }
-    private void realVisitorsCounter(LogEntry log){
+
+    public Map.Entry<String, Integer> getMaxVisitfoVisitor(){
+        return uniqueVisitorsList.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .orElse(null);
+    }
+    public Map.Entry<LocalDateTime, Integer> getVisitsCountPerSecond(){
+        return visitsPerSecondList.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .orElse(null);
+    }
+    private void addVisitsCountPerSecond(LogEntry log){
+        if (!log.getUserAgent().isBot())
+            visitsPerSecondList.compute(log.getDateTime(), (k, v)-> v == null ? v=1 : v + 1);
+    }
+
+    private void fromHourToSecond(){
+        long seconds = Duration.between(minTime, maxTime).getSeconds();
+        Stream.iterate(minTime, date -> date.plusSeconds(1))
+                .limit(seconds +1)
+                .forEach(date -> visitsPerSecondList.put(date, 1));
+
+    }
+    private void uniqueVisitorsCounter(LogEntry log){
         if(!log.getUserAgent().isBot()) {
             realVisitorsCount += 1;
-            if (!uniqueVisitorsList.containsKey(log.getIp())){
-                uniqueVisitorsList.put(log.getIp(), 1);
-            } else {
-                uniqueVisitorsList.replace(log.getIp(), uniqueVisitorsList.get(log.getIp())+1);
-            }
         }
-
     }
 
+    private void addUniqueVisitorsList(LogEntry log){
+        if(!log.getUserAgent().isBot()) {
+            uniqueVisitorsList.compute(log.getIp(), (k, v)-> v == null ? v = 1 : v+1);
+        }
+    }
+    private void addReferThisSiteList(LogEntry log){
+        if(!log.getUserAgent().isBot())
+            referThisSiteList.add(log.getRefer());
+    }
     public long getUniqueVisitorsPerHour(){
         double uniqueIpCount = uniqueVisitorsList.values().size();
         return (long) ((double) realVisitorsCount /uniqueIpCount);
@@ -82,21 +118,11 @@ public class Statistics {
     }
 
     private void operationSystemCount(LogEntry log) {
-        if (!osStatistic.containsKey(log.getUserAgent().getOperationalSystem().toString())){
-            osStatistic.put(log.getUserAgent().getOperationalSystem().getOperationSystemName(), 1);
-        } else {
-            osStatistic.replace(log.getUserAgent().getOperationalSystem().toString(),
-                    osStatistic.get(log.getUserAgent().getOperationalSystem().getOperationSystemName())+1);
-        }
+        osStatistic.compute(log.getUserAgent().getOperationalSystem().toString(), (k,v)-> v == null ? v=1 : v+1);
     }
 
     private void browsersCount(LogEntry log) {
-        if (!browserStatistic.containsKey(log.getUserAgent().getBrowser().getBrowserName())){
-            browserStatistic.put(log.getUserAgent().getBrowser().getBrowserName(), 1);
-        } else {
-            browserStatistic.replace(log.getUserAgent().getBrowser().getBrowserName(),
-                    browserStatistic.get(log.getUserAgent().getBrowser().getBrowserName())+1);
-        }
+        browserStatistic.compute(log.getUserAgent().getBrowser().getBrowserName(), (k,v)-> v == null ? v=1 : v+1);
     }
 
     private void createOKPagesList(LogEntry log) {
@@ -127,6 +153,12 @@ public class Statistics {
             notFoundPageList.add(log.getUrl());
         }
     }
+
+    private void errorResponseCounter(LogEntry log){
+        if(log.getResponseCode().startsWith("4") || log.getResponseCode().startsWith("5")){
+            errorResponseCount+=1;
+        }
+    }
     public BigDecimal getTrafficRate() {
         double hours = getHours();
         return BigDecimal.valueOf(totalTraffic / hours);
@@ -146,10 +178,9 @@ public class Statistics {
         }
         return hours;
     }
-    private void errorResponseCounter(LogEntry log){
-        if(log.getResponseCode().startsWith("4") || log.getResponseCode().startsWith("5")){
-            errorResponseCount+=1;
-        }
+
+    public HashSet<String> getReferThisSiteList() {
+        return referThisSiteList;
     }
 
     public long getTotalTraffic() {

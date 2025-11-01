@@ -1,1 +1,1 @@
-109.195.139.199 - - [25/Sep/2022:06:34:37 +0300] "GET /housekeeping/?rss=1&p=156&lg=1 HTTP/1.0" 200 2053 "https://www.nova-news.ru//cooking/?rss=1&p=156&lg=1" "Mozilla/5.0 (iPhone; CPU iPhone OS 8_1_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) OPiOS/9.1.0.86723 Mobile/12B440 Safari/9537.53"
+10.142.178.73 - - [25/Sep/2022:07:25:23 +0300] "GET /data.php?rss=1&json=1&lg=2 HTTP/1.0" 200 15591 "-" "-"
